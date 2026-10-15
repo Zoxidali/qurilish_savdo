@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Dashboard</h2>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5>Jami buyurtmalar</h5>
+                <h2>{{ total_orders }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5>Jami tushum</h5>
+                <h2>{{ total_revenue }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5>Kam qoldiq</h5>
+                <h2>{{ low_stock_products|length }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h4>Ombordagi qoldiq grafigi</h4>
+        <canvas id="stockChart"></canvas>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h4>Oxirgi buyurtmalar</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Sotuvchi</th>
+                    <th>Summa</th>
+                    <th>Status</th>
+                    <th>Sana</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.seller_name }}</td>
+                    <td>{{ order.total_price }}</td>
+                    <td>{{ order.status }}</td>
+                    <td>{{ order.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{ product_labels|json_script:"product-labels" }}
+{{ product_stocks|json_script:"product-stocks" }}
+
+<script>
+    const labels = JSON.parse(document.getElementById('product-labels').textContent);
+    const dataValues = JSON.parse(document.getElementById('product-stocks').textContent);
+
+    new Chart(document.getElementById('stockChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Ombordagi qoldiq',
+                data: dataValues
+            }]
+        }
+    });
+</script>
+{% endblock %}

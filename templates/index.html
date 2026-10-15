@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Bosh sahifa{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+    <label for="barcodeScan" class="form-label fw-bold">Shtrix-kod bo'yicha tezkor qidirish / qo'shish:</label>
+    <input type="text" id="barcodeScan" class="form-control form-control-lg" placeholder="Shtrix-kodni skanerlang..." autofocus>
+</div>
+<h2 class="mb-4">Mahsulotlar</h2>
+
+<form method="post" action="{% url 'add_selected_to_cart' %}">
+    {% csrf_token %}
+<script>
+document.getElementById('barcodeScan').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        const barcode = this.value.trim();
+
+        // Mahsulotlar ro'yxatidan shu shtrix-kodli elementni qidiramiz
+        // Yoki API orqali qidirib savatga qo'shamiz
+        fetch(`/api/products/?search=${barcode}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > 0) {
+                    const product = data[0];
+                    // Topilgan mahsulot checkbox'ini belgilaymiz
+                    const checkbox = document.getElementById(`product_${product.id}`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        checkbox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // Inputni tozalaymiz
+                        document.getElementById('barcodeScan').value = '';
+                    }
+                } else {
+                    alert('Bunday shtrix-kodli mahsulot topilmadi!');
+                }
+            });
+    }
+});
+</script>
+    <div class="row g-4">
+        {% for product in products %}
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="mb-1"><strong>Kategoriya:</strong> {{ product.category.name }}</p>
+                    <p class="mb-1"><strong>Narxi:</strong> {{ product.price }}</p>
+                    <p class="mb-3"><strong>Qoldiq:</strong> {{ product.stock }}</p>
+
+                    {% if product.is_low_stock %}
+                        <div class="alert alert-warning py-2">Qoldiq kam</div>
+                    {% endif %}
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="product_ids" value="{{ product.id }}" id="product_{{ product.id }}">
+                        <label class="form-check-label" for="product_{{ product.id }}">
+                            Tanlash
+                        </label>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Soni</label>
+                        <input
+                            type="number"
+                            name="quantities"
+                            min="1"
+                            max="{{ product.stock }}"
+                            value="1"
+                            class="form-control"
+                        >
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-success">
+            Tanlanganlarni savatga qo‘shish
+        </button>
+        <a href="{% url 'cart_detail' %}" class="btn btn-primary">
+            Savatni ko‘rish
+        </a>
+    </div>
+</form>
+{% endblock %}

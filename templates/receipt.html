@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Chek #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm p-4">
+            <div class="text-center mb-4">
+                <h3>Savdo Cheki</h3>
+                <p class="text-muted mb-0">Buyurtma raqami: #{{ order.id }}</p>
+                <p class="text-muted">Sana: {{ order.created_at|date:"d.m.Y H:i" }}</p>
+            </div>
+
+            <table class="table table-sm mb-3">
+                <thead>
+                    <tr>
+                        <th>Mahsulot</th>
+                        <th>Soni</th>
+                        <th>Narxi</th>
+                        <th>Jami</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items.all %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.price }}</td>
+                        <td>{{ item.total_price }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <hr>
+            <div class="d-flex justify-content-between mb-4">
+                <h5>Umumiy summa:</h5>
+                <h5>{{ order.total_amount }} so'm</h5>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button onclick="window.print()" class="btn btn-secondary w-100">Chekni chop etish</button>
+                <a href="{% url 'index' %}" class="btn btn-primary w-100">Yangi savdo</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
